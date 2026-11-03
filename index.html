@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Piring Gizi – Game Makan Sehat</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f9ee;--card:#fff;--ink:#16301f;--mut:#4f6b58;--g:#2f8f4e;--y:#ffc93c;--r:#e5484d;--o:#ff8a3d;--line:#cfe6d2;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10211a;--card:#1b3427;--ink:#eaf7ec;--mut:#9dc2a8;--g:#4fb36f;--line:#2c4d3a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10211a;--card:#1b3427;--ink:#eaf7ec;--mut:#9dc2a8;--g:#4fb36f;--line:#2c4d3a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 17px/1.4 "Baloo 2",system-ui,sans-serif}
+.wrap{max-width:480px;margin:0 auto;padding:18px 16px 32px;text-align:center}
+h1{font-size:40px;font-weight:800;margin:6px 0 0;line-height:1.05}
+h2{font-size:26px;font-weight:800;margin:4px 0}
+p{margin:6px 0;color:var(--mut)}
+.plate{width:168px;height:168px;border-radius:50%;margin:14px auto;background:conic-gradient(var(--g) 0 25%,var(--y) 25% 50%,var(--o) 50% 75%,#8fd16a 75%);display:grid;place-items:center;position:relative}
+.plate b{width:88px;height:88px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:22px;line-height:1.1}
+.plate i{position:absolute;font-style:normal;font-size:30px}
+.btn{background:var(--g);color:#fff;border:0;border-radius:14px;padding:12px 18px;font:700 18px "Baloo 2",system-ui,sans-serif;cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+.row{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px;background:var(--card);border:2px solid var(--line);border-radius:18px;color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.row span:first-child{font-size:38px}
+.row strong{display:block;font-size:20px}
+.row small{color:var(--mut);font-size:15px}
+.row em{margin-left:auto;font-style:normal;color:#e0a100;font-size:20px;letter-spacing:2px}
+.hud{display:flex;justify-content:space-between;font-weight:800;margin-bottom:8px}
+canvas{width:100%;max-width:360px;aspect-ratio:3/4;background:var(--card);border:2px solid var(--line);border-radius:18px;touch-action:none;display:block;margin:0 auto}
+.big{font-size:84px;line-height:1.1;margin:10px 0 0}
+.opts{display:grid;gap:8px;margin-top:12px}
+.opts .btn{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.opts .ok{background:var(--g);color:#fff;border-color:var(--g)}
+.opts .no{background:var(--r);color:#fff;border-color:var(--r)}
+.fb{min-height:48px;margin-top:10px;font-weight:700}
+.stars{font-size:54px;color:#e0a100;letter-spacing:6px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:360px;margin:0 auto}.card{aspect-ratio:1;font-size:34px;border-radius:14px;border:2px solid var(--line);background:var(--g);color:#fff;font:800 34px "Baloo 2",system-ui,sans-serif;cursor:pointer;padding:0}.card.open{background:var(--card);color:var(--ink)}.card.done{background:var(--y);border-color:var(--y);color:#16301f}
+[hidden]{display:none!important}
+</style></head><body><noscript><p style="padding:16px">Aktifkan JavaScript atau buka lewat Safari agar game bisa dimainkan.</p></noscript><div class="wrap">
+
+<section class="scr" id="home">
+<h1>Piring Gizi</h1>
+<p>Pilih makanan sehat dan kumpulkan bintang.</p>
+<div class="plate"><i style="top:14px;left:20px">🥦</i><i style="top:14px;right:20px">🍚</i><i style="bottom:14px;left:20px">🍎</i><i style="bottom:14px;right:20px">🐟</i><b><span>★ <span id="tot">0</span><br>dari 9</span></b></div>
+<button class="row" data-act="start1"><span>🧺</span><span><strong>Tangkap Sehat</strong><small>Tangkap makanan sehat, hindari jajanan</small></span><em id="s-catch"></em></button>
+<button class="row" data-act="start2"><span>🃏</span><span><strong>Kartu Gizi</strong><small>Cocokkan 8 pasang makanan sehat</small></span><em id="s-memo"></em></button>
+<button class="row" data-act="start3"><span>💡</span><span><strong>Kuis Gizi</strong><small>6 pertanyaan seputar makan sehat</small></span><em id="s-quiz"></em></button>
+</section>
+
+<section class="scr" id="g1" hidden>
+<div class="hud"><span>Skor <span id="sc">0</span></span><span>Waktu <span id="tm">40</span></span></div>
+<canvas id="cv" width="360" height="480" aria-label="Geser keranjang untuk menangkap makanan"></canvas>
+<div class="fb" id="fb1">Geser keranjang dengan jari, mouse, atau tombol panah.</div>
+<button class="btn alt" data-act="home">Menu</button>
+</section>
+
+<section class="scr" id="g2" hidden>
+<div class="hud"><span>Pasangan <span id="c2">0</span> dari 8</span><span>Langkah <span id="n2">0</span></span></div>
+<div class="grid" id="gr"></div><div class="fb" id="fb2">Cari dua kartu yang sama.</div>
+<button class="btn alt" data-act="home">Menu</button>
+</section>
+
+<section class="scr" id="g3" hidden>
+<div class="hud"><span>Soal <span id="n3">1</span> dari 6</span><span>Benar <span id="c3">0</span></span></div>
+<h2 id="q3"></h2>
+<div class="opts" id="o3"></div><div class="fb" id="fb3"></div>
+</section>
+
+<section class="scr" id="res" hidden>
+<h2>Selesai!</h2>
+<div class="stars" id="rs"></div>
+<p id="rt" style="font-size:20px"></p>
+<div class="opts"><button class="btn" id="ra">Main lagi</button><button class="btn alt" data-act="home">Kembali ke menu</button></div>
+</section>
+</div>
+<script>(function(){
+
+const $=s=>document.querySelector(s),rnd=n=>Math.random()*n|0,shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+let best={};try{best=JSON.parse(localStorage.getItem('pg')||'{}')}catch(e){}
+function save(k,s){if((best[k]||0)<s){best[k]=s;try{localStorage.setItem('pg',JSON.stringify(best))}catch(e){}}upd()}
+function upd(){$('#tot').textContent=(best.catch||0)+(best.memo||0)+(best.quiz||0);['catch','memo','quiz'].forEach(k=>{const n=best[k]||0;$('#s-'+k).textContent='★'.repeat(n)+'☆'.repeat(3-n)})}
+function show(id){stop1();document.querySelectorAll('.scr').forEach(e=>e.hidden=e.id!==id);scrollTo(0,0)}
+function result(k,sc,th,msg,fn){const s=sc>=th[2]?3:sc>=th[1]?2:sc>=th[0]?1:0;save(k,s);$('#rs').textContent='★'.repeat(s)+'☆'.repeat(3-s);$('#rt').textContent=msg;$('#ra').onclick=fn;show('res')}
+
+/* Game 1: Tangkap Sehat */
+const cv=$('#cv'),cx=cv.getContext('2d'),GOOD=['🍎','🥦','🥕','🍌','🥛','🐟','🥚','🍊'],BAD=['🍔','🍟','🍩','🥤','🍭'];
+let g1=null;
+function start1(){show('g1');g1={x:180,sc:0,t:40,items:[],last:0,sp:0,run:true};$('#sc').textContent=0;$('#tm').textContent=40;$('#fb1').textContent='Geser keranjang dengan jari, mouse, atau tombol panah.';g1.raf=requestAnimationFrame(loop1);g1.tm=setInterval(()=>{g1.t--;$('#tm').textContent=g1.t;if(g1.t<=0)end1()},1000)}
+function stop1(){if(g1){g1.run=false;clearInterval(g1.tm);cancelAnimationFrame(g1.raf)}}
+function end1(){const s=g1.sc;stop1();result('catch',s,[60,120,180],'Skor kamu '+s+'. Makanan segar dan beragam memberi tenaga untuk belajar.',start1)}
+function loop1(ts){if(!g1||!g1.run)return;const dt=Math.min(ts-(g1.last||ts),50);g1.last=ts;g1.sp-=dt;
+if(g1.sp<=0){g1.sp=650;const bad=Math.random()<.35,a=bad?BAD:GOOD;g1.items.push({e:a[rnd(a.length)],bad,x:20+Math.random()*320,y:-20,v:.12+Math.random()*.1+(40-g1.t)*.003})}
+cx.clearRect(0,0,360,480);cx.font='30px serif';cx.textAlign='center';
+g1.items.forEach(i=>{i.y+=i.v*dt;cx.fillText(i.e,i.x,i.y)});cx.fillText('🧺',g1.x,466);
+g1.items=g1.items.filter(i=>{if(i.y>425&&i.y<480&&Math.abs(i.x-g1.x)<36){g1.sc=Math.max(0,g1.sc+(i.bad?-15:10));$('#fb1').textContent=i.bad?'Jajanan manis atau berminyak: kurangi, ya. -15':'Bagus! Makanan sehat. +10';$('#sc').textContent=g1.sc;return false}return i.y<500});
+g1.raf=requestAnimationFrame(loop1)}
+cv.addEventListener('pointermove',e=>{if(g1){const r=cv.getBoundingClientRect();g1.x=Math.max(20,Math.min(340,(e.clientX-r.left)/r.width*360))}});
+addEventListener('keydown',e=>{if(g1&&g1.run){if(e.key==='ArrowLeft')g1.x=Math.max(20,g1.x-28);if(e.key==='ArrowRight')g1.x=Math.min(340,g1.x+28)}});
+
+/* Game 2: Kartu Gizi */
+const MF=[['🥦','Brokoli','kaya serat dan vitamin'],['🍎','Apel','sumber vitamin dan serat'],['🥕','Wortel','baik untuk kesehatan mata'],['🍌','Pisang','memberi tenaga'],['🥚','Telur','sumber protein'],['🐟','Ikan','sumber protein dan lemak sehat'],['🥛','Susu','sumber kalsium untuk tulang'],['🍊','Jeruk','kaya vitamin C']];
+let m={};
+function start2(){m={a:null,lock:false,pairs:0,steps:0};$('#c2').textContent=0;$('#n2').textContent=0;$('#fb2').textContent='Cari dua kartu yang sama.';
+const gr=$('#gr');gr.innerHTML='';shuf(MF.concat(MF)).forEach(f=>{const b=document.createElement('button');b.className='card';b.textContent='?';b.onclick=()=>flip(b,f);gr.appendChild(b)});show('g2')}
+function flip(b,f){if(m.lock||b.classList.contains('open'))return;b.classList.add('open');b.textContent=f[0];
+if(!m.a){m.a=[b,f];return}
+const [b1,f1]=m.a;m.a=null;m.steps++;$('#n2').textContent=m.steps;
+if(f1===f){m.pairs++;$('#c2').textContent=m.pairs;b1.classList.add('done');b.classList.add('done');$('#fb2').textContent=f[1]+': '+f[2]+'.';
+if(m.pairs===8)setTimeout(()=>result('memo',Math.max(0,30-m.steps),[0,10,16],'Selesai dalam '+m.steps+' langkah. Semua makanan tadi baik untuk tubuhmu.',start2),1400)}
+else{m.lock=true;setTimeout(()=>{b.classList.remove('open');b1.classList.remove('open');b.textContent=b1.textContent='?';m.lock=false},800)}}
+
+/* Game 3: Kuis Gizi */
+const QZ=[['Mana sarapan yang paling seimbang?',['Nasi, telur, sayur, dan buah','Donat dan minuman soda','Kerupuk saja']],['Berapa gelas air putih yang dianjurkan setiap hari?',['Sekitar 8 gelas','1 gelas','Tidak perlu jika sudah minum teh manis']],['Zat gizi apa yang membantu membangun otot?',['Protein','Gula','Garam']],['Camilan terbaik saat istirahat sekolah?',['Buah potong','Permen','Keripik asin']],['Mengapa sayur dan buah penting?',['Kaya serat dan vitamin','Hanya untuk hiasan piring','Membuat cepat mengantuk']],['Apa yang sebaiknya dikurangi?',['Minuman manis','Air putih','Sayuran']]];
+let i3,c3;
+function start3(){i3=0;c3=0;$('#c3').textContent=0;show('g3');next3()}
+function next3(){if(i3>=6)return result('quiz',c3,[4,5,6],'Benar '+c3+' dari 6. Terus biasakan makan bergizi setiap hari.',start3);
+const [q,o]=QZ[i3];$('#n3').textContent=i3+1;$('#q3').textContent=q;$('#fb3').textContent='';$('#o3').innerHTML='';
+shuf(o.map((t,k)=>[t,k===0])).forEach(([t,ok])=>{const b=document.createElement('button');b.className='btn';b.textContent=t;b.onclick=()=>{document.querySelectorAll('#o3 button').forEach(x=>{x.disabled=true});b.classList.add(ok?'ok':'no');if(ok){c3++;$('#c3').textContent=c3}$('#fb3').textContent=ok?'Tepat sekali!':'Jawaban yang benar: '+o[0];i3++;setTimeout(next3,1500)};$('#o3').appendChild(b)})}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;if(a==='home')show('home');else if(a==='start1')start1();else if(a==='start2')start2();else if(a==='start3')start3()});
+upd();
+})();
+</script></body></html>
